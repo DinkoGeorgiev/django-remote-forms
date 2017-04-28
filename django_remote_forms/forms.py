@@ -1,4 +1,4 @@
-try: 
+try:
     from django.utils.datastructures import SortedDict
 except ImportError:
     from collections import OrderedDict as SortedDict
@@ -132,8 +132,8 @@ class RemoteForm(object):
             try:
                 remote_field_class = getattr(fields, remote_field_class_name)
                 remote_field = remote_field_class(field, form_initial_field_data, field_name=name)
-            except Exception, e:
-                logger.warning('Error serializing field %s: %s', remote_field_class_name, str(e))
+            except Exception as exc:
+                logger.warning('Error serializing field %s: %s', remote_field_class_name, str(exc))
                 field_dict = {}
             else:
                 field_dict = remote_field.as_dict()

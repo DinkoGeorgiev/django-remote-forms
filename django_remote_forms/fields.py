@@ -42,8 +42,8 @@ class RemoteField(object):
         try:
             remote_widget_class = getattr(widgets, remote_widget_class_name)
             remote_widget = remote_widget_class(self.field.widget, field_name=self.field_name)
-        except Exception, e:
-            logger.warning('Error serializing %s: %s', remote_widget_class_name, str(e))
+        except Exception as exc:
+            logger.warning('Error serializing %s: %s', remote_widget_class_name, str(exc))
             widget_dict = {}
         else:
             widget_dict = remote_widget.as_dict()
@@ -51,6 +51,8 @@ class RemoteField(object):
         field_dict['widget'] = widget_dict
 
         return field_dict
+
+RemoteUSStateField = RemoteField
 
 
 class RemoteCharField(RemoteField):
@@ -63,6 +65,8 @@ class RemoteCharField(RemoteField):
         })
 
         return field_dict
+
+RemotePhoneNumberField = RemoteCharField
 
 
 class RemoteIntegerField(RemoteField):
@@ -203,6 +207,8 @@ class RemoteTypedChoiceField(RemoteChoiceField):
         })
 
         return field_dict
+
+RemoteLazyTypedChoiceField = RemoteTypedChoiceField
 
 
 class RemoteMultipleChoiceField(RemoteChoiceField):

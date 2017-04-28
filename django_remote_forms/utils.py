@@ -1,9 +1,12 @@
 from django.utils.functional import Promise
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text as force_unicode
+from django.http.request import QueryDict
 
 
 def resolve_promise(o):
     if isinstance(o, dict):
+        if isinstance(o, QueryDict):
+            o = o.copy()
         for k, v in o.items():
             o[k] = resolve_promise(v)
     elif isinstance(o, (list, tuple)):

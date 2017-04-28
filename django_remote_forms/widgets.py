@@ -50,10 +50,6 @@ class RemoteHiddenInput(RemoteInput):
 class RemoteEmailInput(RemoteInput):
     def as_dict(self):
         widget_dict = super(RemoteEmailInput, self).as_dict()
-
-        widget_dict['title'] = 'TextInput'
-        widget_dict['input_type'] = 'text'
-
         return widget_dict
 
 
@@ -114,8 +110,8 @@ class RemoteTimeInput(RemoteInput):
         widget_dict = super(RemoteTimeInput, self).as_dict()
 
         widget_dict['format'] = self.widget.format
-        widget_dict['manual_format'] = self.widget.format != None
-        widget_dict['date'] = self.widget.format != None
+        widget_dict['manual_format'] = self.widget.format is not None
+        widget_dict['date'] = self.widget.format is not None
         widget_dict['input_type'] = 'time'
 
         return widget_dict
@@ -180,6 +176,8 @@ class RemoteSelect(RemoteWidget):
         widget_dict['input_type'] = 'select'
 
         return widget_dict
+
+RemoteLazySelect = RemoteSelect
 
 
 class RemoteNullBooleanSelect(RemoteSelect):
