@@ -1,4 +1,6 @@
 import datetime
+import six
+
 try:
     from django.utils.datastructures import SortedDict
 except ImportError:
@@ -66,7 +68,13 @@ class RemoteCharField(RemoteField):
 
         return field_dict
 
-RemotePhoneNumberField = RemoteCharField
+
+class RemotePhoneNumberField(RemoteCharField):
+    def as_dict(self):
+        field_dict = super(RemotePhoneNumberField, self).as_dict()
+        if field_dict['initial'] is not None:
+            field_dict['initial'] = six.text_type(field_dict['initial'])
+        return field_dict
 
 
 class RemoteIntegerField(RemoteField):
@@ -188,7 +196,6 @@ class RemoteChoiceField(RemoteField):
                 'value': key,
                 'display': value
             })
-
         return field_dict
 
 
@@ -208,7 +215,13 @@ class RemoteTypedChoiceField(RemoteChoiceField):
 
         return field_dict
 
-RemoteLazyTypedChoiceField = RemoteTypedChoiceField
+
+class RemoteLazyTypedChoiceField(RemoteTypedChoiceField):
+    def as_dict(self):
+        field_dict = super(RemoteLazyTypedChoiceField, self).as_dict()
+        if field_dict['initial'] is not None:
+            field_dict['initial'] = six.text_type(field_dict['initial'])
+        return field_dict
 
 
 class RemoteMultipleChoiceField(RemoteChoiceField):
@@ -218,7 +231,10 @@ class RemoteMultipleChoiceField(RemoteChoiceField):
 
 class RemoteModelMultipleChoiceField(RemoteMultipleChoiceField):
     def as_dict(self):
-        return super(RemoteModelMultipleChoiceField, self).as_dict()
+        field_dict = super(RemoteModelMultipleChoiceField, self).as_dict()
+        if field_dict['initial'] is not None:
+            field_dict['initial'] = [str(getattr(val, 'pk', val)) for val in field_dict['initial']]
+        return field_dict
 
 
 class RemoteTypedMultipleChoiceField(RemoteMultipleChoiceField):

@@ -1,9 +1,16 @@
+from copy import copy
+
+import six
+
+from django_remote_forms import fields, logger
+from django_remote_forms.fields import RemoteModelMultipleChoiceField
+from django_remote_forms.utils import resolve_promise
+
+
 try:
     from django.utils.datastructures import SortedDict
 except ImportError:
     from collections import OrderedDict as SortedDict
-from django_remote_forms import fields, logger
-from django_remote_forms.utils import resolve_promise
 
 
 class RemoteForm(object):
@@ -21,23 +28,28 @@ class RemoteForm(object):
 
         # Make sure all passed field lists are valid
         if self.excluded_fields and not (self.all_fields >= self.excluded_fields):
-            logger.warning('Excluded fields %s are not present in form fields' % (self.excluded_fields - self.all_fields))
+            logger.warning('Excluded fields %s are not present in form fields' %
+                           (self.excluded_fields - self.all_fields))
             self.excluded_fields = set()
 
         if self.included_fields and not (self.all_fields >= self.included_fields):
-            logger.warning('Included fields %s are not present in form fields' % (self.included_fields - self.all_fields))
+            logger.warning('Included fields %s are not present in form fields' %
+                           (self.included_fields - self.all_fields))
             self.included_fields = set()
 
         if self.readonly_fields and not (self.all_fields >= self.readonly_fields):
-            logger.warning('Readonly fields %s are not present in form fields' % (self.readonly_fields - self.all_fields))
+            logger.warning('Readonly fields %s are not present in form fields' %
+                           (self.readonly_fields - self.all_fields))
             self.readonly_fields = set()
 
         if self.ordered_fields and not (self.all_fields >= set(self.ordered_fields)):
-            logger.warning('Readonly fields %s are not present in form fields' % (set(self.ordered_fields) - self.all_fields))
+            logger.warning('Readonly fields %s are not present in form fields' %
+                           (set(self.ordered_fields) - self.all_fields))
             self.ordered_fields = []
 
         if self.included_fields | self.excluded_fields:
-            logger.warning('Included and excluded fields have following fields %s in common' % (set(self.ordered_fields) - self.all_fields))
+            logger.warning('Included and excluded fields have following fields %s in common' %
+                           (set(self.ordered_fields) - self.all_fields))
             self.excluded_fields = set()
             self.included_fields = set()
 
@@ -115,6 +127,7 @@ class RemoteForm(object):
         form_dict['ordered_fields'] = self.fields
 
         initial_data = {}
+        model_multi_fields = []
 
         for name, field in [(x, self.form.fields[x]) for x in self.fields]:
             # Retrieve the initial data from the form itself if it exists so
@@ -138,6 +151,9 @@ class RemoteForm(object):
             else:
                 field_dict = remote_field.as_dict()
 
+            if isinstance(remote_field, RemoteModelMultipleChoiceField):
+                model_multi_fields.append(name)
+
             if name in self.readonly_fields:
                 field_dict['readonly'] = True
 
@@ -150,7 +166,18 @@ class RemoteForm(object):
             initial_data[name] = form_dict['fields'][name]['initial']
 
         if self.form.data:
-            form_dict['data'] = self.form.data
+            list_data = {}
+            for fld_name in model_multi_fields:
+                field_vals = [six.text_type(getattr(val, 'pk', val)) for val in self.form.data.getlist(fld_name)]
+                if len(field_vals) > 1:
+                    list_data[fld_name] = field_vals
+            if list_data:
+                # We need to modify the data.
+                data = copy(self.form.data)
+                data.update(list_data)
+                form_dict['data'] = data
+            else:
+                form_dict['data'] = self.form.data
         else:
             form_dict['data'] = initial_data
 
