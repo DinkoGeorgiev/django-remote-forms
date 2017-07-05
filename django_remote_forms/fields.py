@@ -201,7 +201,10 @@ class RemoteChoiceField(RemoteField):
 
 class RemoteModelChoiceField(RemoteChoiceField):
     def as_dict(self):
-        return super(RemoteModelChoiceField, self).as_dict()
+        field_dict = super(RemoteModelChoiceField, self).as_dict()
+        if field_dict['initial'] is not None:
+            field_dict['initial'] = str(getattr(field_dict['initial'], 'pk', field_dict['initial']))
+        return field_dict
 
 
 class RemoteTypedChoiceField(RemoteChoiceField):
