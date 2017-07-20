@@ -38,6 +38,8 @@ class RemoteField(object):
 
         field_dict['error_messages'] = self.field.error_messages
 
+        field_dict['input_by'] = getattr(self.field, 'input_by', None)
+        field_dict['input_hint'] = getattr(self.field, 'input_hint', None)
         # Instantiate the Remote Forms equivalent of the widget if possible
         # in order to retrieve the widget contents as a dictionary.
         remote_widget_class_name = 'Remote%s' % self.field.widget.__class__.__name__
