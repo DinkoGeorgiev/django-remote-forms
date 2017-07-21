@@ -34,7 +34,10 @@ class RemoteField(object):
         field_dict['required'] = self.field.required
         field_dict['label'] = self.field.label
         field_dict['initial'] = self.form_initial_data or self.field.initial
-        field_dict['help_text'] = self.field.help_text
+        if isinstance(self.field.help_text, list) or isinstance(self.field.help_text, tuple):
+            field_dict['help_text'] = self.field.help_text
+        else:
+            field_dict['help_text'] = [self.field.help_text, ]
 
         field_dict['error_messages'] = self.field.error_messages
 
