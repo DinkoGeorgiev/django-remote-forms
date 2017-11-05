@@ -208,7 +208,7 @@ class RemoteModelChoiceField(RemoteChoiceField):
     def as_dict(self):
         field_dict = super(RemoteModelChoiceField, self).as_dict()
         if field_dict['initial'] is not None:
-            field_dict['initial'] = str(getattr(field_dict['initial'], 'pk', field_dict['initial']))
+            field_dict['initial'] = getattr(field_dict['initial'], 'pk', field_dict['initial'])
         return field_dict
 
 
@@ -241,7 +241,7 @@ class RemoteModelMultipleChoiceField(RemoteMultipleChoiceField):
     def as_dict(self):
         field_dict = super(RemoteModelMultipleChoiceField, self).as_dict()
         if field_dict['initial'] is not None:
-            field_dict['initial'] = [str(getattr(val, 'pk', val)) for val in field_dict['initial']]
+            field_dict['initial'] = [getattr(val, 'pk', val) for val in field_dict['initial']]
         return field_dict
 
 
